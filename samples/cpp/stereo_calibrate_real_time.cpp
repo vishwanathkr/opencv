@@ -27,6 +27,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <iostream>
 
+#define timeGap 3000000000
+
 using namespace cv;
 using namespace std;
 
@@ -36,7 +38,7 @@ static void help() {
     cout<<"It also displays the rectified image\n";
     cout<<"\nKeyboard Shortcuts:\n";
     cout<<"1. Default Mode: Detecting (Which detects chessboard corners in real time)\n";
-    cout<<"2. 'c': Starts capturing stereo images (With 2 Sec gap, This can be changed by changing 'timeGap' variable)\n";
+    cout<<"2. 'c': Starts capturing stereo images (With 2 Sec gap, This can be changed by changing 'timeGap' macro)\n";
     cout<<"3. 'p': Process and Calibrate (Once all the images are clicked you can press 'p' to calibrate)";
     cout<<"\n/******* HELP ENDS *********/\n\n";
 }
@@ -47,7 +49,7 @@ const int noOfStereoPairs = 14;
 int stereoPairIndex = 0, cornerImageIndex=0;
 int goIn = 1;
 Mat _leftOri, _rightOri;
-int64 prevTickCount, timeGap = 3000000000;
+int64 prevTickCount;
 vector<Point2f> cornersLeft, cornersRight;
 vector<vector<Point2f> > cameraImagePoints[2];
 
