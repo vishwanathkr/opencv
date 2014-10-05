@@ -286,7 +286,7 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
     }
 }
 
-int main(int argc, char** argv) {
+int main(int, char**) {
     help();
     
     VideoCapture camLeft(0), camRight(2);
