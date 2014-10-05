@@ -4,7 +4,7 @@
 
  This code can be used to calibrate stereo camera or two cameras to get the intrinsic
  and extrinsic files.
- 
+
  This code also generated rectified image, and also shows RMS Error and Reprojection error
  to find the accuracy of calibration.
  
@@ -36,7 +36,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
-
 #include <iostream>
 
 using namespace cv;
@@ -60,9 +59,7 @@ int stereoPairIndex = 0, cornerImageIndex=0;
 int goIn = 1;
 Mat _leftOri, _rightOri;
 int64 prevTickCount, timeGap = 3000000000;
-
 vector<Point2f> cornersLeft, cornersRight;
-
 vector<vector<Point2f> > cameraImagePoints[2];
 
 Mat displayCapturedImageIndex(Mat);
@@ -88,34 +85,24 @@ Mat displayMode(Mat img) {
         modeString="CALIBRATED";
     }
     putText(img, modeString, Point(50,50), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,255,0), 2);
-    
     if (mode == CAPTURING) {
         img = displayCapturedImageIndex(img);
     }
-    
     return img;
 }
 
 bool findChessboardCornersAndDraw(Mat inputLeft, Mat inputRight, Size boardSize) {
-    
-    
-    
     _leftOri = inputLeft;
     _rightOri = inputRight;
-    
     bool foundLeft = false, foundRight = false;
-    
     cvtColor(inputLeft, inputLeft, COLOR_BGR2GRAY);
     cvtColor(inputRight, inputRight, COLOR_BGR2GRAY);
     foundLeft = findChessboardCorners(inputLeft, boardSize, cornersLeft, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
     foundRight = findChessboardCorners(inputRight, boardSize, cornersRight, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
-    
     drawChessboardCorners(_leftOri, boardSize, cornersLeft, foundLeft);
     drawChessboardCorners(_rightOri, boardSize, cornersRight, foundRight);
-    
     _leftOri = displayMode(_leftOri);
     _rightOri = displayMode(_rightOri);
-    
     if (foundLeft && foundRight) {
         return true;
     }
@@ -130,28 +117,20 @@ void displayImages() {
 }
 
 void saveImages(Mat leftImage, Mat rightImage, int pairIndex) {
-    
     cameraImagePoints[0].push_back(cornersLeft);
     cameraImagePoints[1].push_back(cornersRight);
-    
     cvtColor(leftImage, leftImage, COLOR_BGR2GRAY);
     cvtColor(rightImage, rightImage, COLOR_BGR2GRAY);
-    
     std::ostringstream leftString, rightString;
-    
     leftString<<"left"<<pairIndex<<".jpg";
     rightString<<"right"<<pairIndex<<".jpg";
-    
     imwrite(leftString.str().c_str(), leftImage);
     imwrite(rightString.str().c_str(), rightImage);
 }
 
 void calibrateStereoCamera(Size boardSize, Size imageSize) {
-    
     vector<vector<Point3f> > objectPoints;
-    
     objectPoints.resize(noOfStereoPairs);
-    
     for (int i=0; i<noOfStereoPairs; i++) {
         for (int j=0; j<boardSize.height; j++) {
             for (int k=0; k<boardSize.width; k++) {
@@ -159,7 +138,6 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
             }
         }
     }
-    
     Mat cameraMatrix[2], distCoeffs[2];
     cameraMatrix[0] = Mat::eye(3, 3, CV_64F);
     cameraMatrix[1] = Mat::eye(3, 3, CV_64F);
@@ -174,10 +152,7 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
                                  CALIB_RATIONAL_MODEL +
                                  CALIB_FIX_K3 + CALIB_FIX_K4 + CALIB_FIX_K5,
                                  TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5) );
-    
     cout<<"RMS Error: "<<rms<<"\n";
-    
-    
     double err = 0;
     int npoints = 0;
     vector<Vec3f> lines[2];
@@ -202,8 +177,6 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
         npoints += npt;
     }
     cout << "Average Reprojection Error: " <<  err/npoints << endl;
-    
-    
     FileStorage fs("intrinsics.yml", FileStorage::WRITE);
     if (fs.isOpened()) {
         fs << "M1" << cameraMatrix[0] << "D1" << distCoeffs[0] <<
@@ -212,12 +185,9 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
     }
     else
         cout<<"Error: Could not open intrinsics file.";
-    
     Mat R1, R2, P1, P2, Q;
     Rect validROI[2];
-    
     stereoRectify(cameraMatrix[0], distCoeffs[0], cameraMatrix[1], distCoeffs[1], imageSize, R, T, R1, R2, P1, P2, Q, CALIB_ZERO_DISPARITY, 1, imageSize, &validROI[0], &validROI[1]);
-    
     fs.open("extrinsics.yml", FileStorage::WRITE);
     if (fs.isOpened()) {
         fs << "R" << R << "T" << T << "R1" << R1 << "R2" << R2 << "P1" << P1 << "P2" << P2 << "Q" << Q;
@@ -225,19 +195,13 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
     }
     else
         cout<<"Error: Could not open extrinsics file";
-    
     bool isVerticalStereo = fabs(P2.at<double>(1, 3)) > fabs(P2.at<double>(0, 3));
-    
     Mat rmap[2][2];
-    
     initUndistortRectifyMap(cameraMatrix[0], distCoeffs[0], R1, P1, imageSize, CV_16SC2, rmap[0][0], rmap[0][1]);
     initUndistortRectifyMap(cameraMatrix[1], distCoeffs[1], R2, P2, imageSize, CV_16SC2, rmap[1][0], rmap[1][1]);
-    
-    
     Mat canvas;
     double sf;
     int w, h;
-    
     if (!isVerticalStereo) {
         sf = 600./MAX(imageSize.width, imageSize.height);
         w = cvRound(imageSize.width*sf);
@@ -250,11 +214,8 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
         h = cvRound(imageSize.height*sf);
         canvas.create(h*2, w, CV_8UC3);
     }
-    
     String file;
-    
     namedWindow("rectified");
-    
     for (int i=0; i < noOfStereoPairs; i++) {
         for (int j=0; j < 2; j++) {
             if (j==0) {
@@ -268,10 +229,8 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
             Mat img = imread(st.str().c_str()), rimg, cimg;
             remap(img, rimg, rmap[j][0], rmap[j][1], INTER_LINEAR);
             cimg=rimg;
-            
             Mat canvasPart = !isVerticalStereo ? canvas(Rect(w*j, 0, w, h)) : canvas(Rect(0, h*j, w, h));
             resize(cimg, canvasPart, canvasPart.size(), 0, 0, INTER_AREA);
-        
             Rect vroi(cvRound(validROI[j].x*sf), cvRound(validROI[j].y*sf),
                       cvRound(validROI[j].width*sf), cvRound(validROI[j].height*sf));
             rectangle(canvasPart, vroi, Scalar(0,0,255), 3, 8);
@@ -288,33 +247,25 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
 
 int main(int, char**) {
     help();
-    
     VideoCapture camLeft(0), camRight(2);
-    
     if (!camLeft.isOpened() || !camRight.isOpened()) {
         cout<<"Error: Stereo Cameras not found or there is some problem connecting them. Please check your cameras.\n";
         exit(-1);
     }
-    
     Size boardSize = Size(7,6);
-    
     Mat inputLeft, inputRight, copyImageLeft, copyImageRight;
     bool foundCornersInBothImage = false;
-    
     namedWindow("Left Image");
     namedWindow("Right Image");
     while (true) {
         camLeft>>inputLeft;
         camRight>>inputRight;
-        
         if ((inputLeft.rows != inputRight.rows) || (inputLeft.cols != inputRight.cols)) {
             cout<<"Error: Images from both cameras are not of some size. Please check the size of each camera.\n";
             exit(-1);
         }
-        
         inputLeft.copyTo(copyImageLeft);
         inputRight.copyTo(copyImageRight);
-        
         foundCornersInBothImage = findChessboardCornersAndDraw(inputLeft, inputRight, boardSize);
         if (foundCornersInBothImage && mode == CAPTURING && stereoPairIndex<14) {
             int64 thisTick = getTickCount();
@@ -326,12 +277,10 @@ int main(int, char**) {
             }
         }
         displayImages();
-        
         if (mode == CALIBRATING) {
             calibrateStereoCamera(boardSize, inputLeft.size());
             waitKey();
         }
-        
         char keyBoardInput = (char)waitKey(50);
         if (keyBoardInput == 'q' || keyBoardInput == 'Q') {
             exit(-1);
