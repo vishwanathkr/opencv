@@ -42,17 +42,35 @@
 using namespace cv;
 using namespace std;
 
+static void help() {
+    cout<<"/******** HELP *******/\n";
+    cout << "\nThis program helps you to calibrate the stereo camera by clicking the images in real time.\n This program generates intrinsics.yml and extrinsics.yml which can be used in Stereo Matching Algorithms. \n You can change number of stereo pairs you want to use by changing 'noOfStereoPairs' variable\n";
+    cout<<"It also displays the rectified image\n";
+    cout<<"\nKeyboard Shortcuts:\n";
+    cout<<"1. Default Mode: Detecting (Which detects chessboard corners in real time)\n";
+    cout<<"2. 'c': Starts capturing stereo images (With 2 Sec gap, This can be changed by changing 'timeGap' variable)\n";
+    cout<<"3. 'p': Process and Calibrate (Once all the images are clicked you can press 'p' to calibrate)";
+    cout<<"\n/******* HELP ENDS *********/\n\n";
+}
+
 enum Modes { DETECTING, CAPTURING, CALIBRATING};
 Modes mode = DETECTING;
 const int noOfStereoPairs = 14;
 int stereoPairIndex = 0, cornerImageIndex=0;
 int goIn = 1;
 Mat _leftOri, _rightOri;
-int64 prevTickCount;
+int64 prevTickCount, timeGap = 3000000000;
 
 vector<Point2f> cornersLeft, cornersRight;
 
 vector<vector<Point2f> > cameraImagePoints[2];
+
+Mat displayCapturedImageIndex(Mat);
+Mat displayMode(Mat);
+bool findChessboardCornersAndDraw(Mat, Mat, Size);
+void displayImages();
+void saveImages(Mat, Mat, int);
+void calibrateStereoCamera(Size, Size);
 
 Mat displayCapturedImageIndex(Mat img) {
     std::ostringstream imageIndex;
@@ -269,11 +287,12 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
 }
 
 int main(int argc, char** argv) {
+    help();
     
     VideoCapture camLeft(0), camRight(2);
     
     if (!camLeft.isOpened() || !camRight.isOpened()) {
-        cout<<"Stereo Cameras not found or there is some problem connecting them. Please check your cameras.\n";
+        cout<<"Error: Stereo Cameras not found or there is some problem connecting them. Please check your cameras.\n";
         exit(-1);
     }
     
@@ -289,7 +308,7 @@ int main(int argc, char** argv) {
         camRight>>inputRight;
         
         if ((inputLeft.rows != inputRight.rows) || (inputLeft.cols != inputRight.cols)) {
-            cout<<"Images from both cameras are not of some size. Please check the size of each camera.\n";
+            cout<<"Error: Images from both cameras are not of some size. Please check the size of each camera.\n";
             exit(-1);
         }
         
@@ -300,7 +319,7 @@ int main(int argc, char** argv) {
         if (foundCornersInBothImage && mode == CAPTURING && stereoPairIndex<14) {
             int64 thisTick = getTickCount();
             int64 diff = thisTick - prevTickCount;
-            if (goIn==1 || diff >= 3000000000) {
+            if (goIn==1 || diff >= timeGap) {
                 goIn=0;
                 saveImages(copyImageLeft, copyImageRight, ++stereoPairIndex);
                 prevTickCount = getTickCount();
