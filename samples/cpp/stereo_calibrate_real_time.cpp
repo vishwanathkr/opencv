@@ -1,33 +1,22 @@
 /* This is a code by Team SAHE, India */
 
 /* *************** Stereo Camera Calibration in Real Time **************
-
  This code can be used to calibrate stereo camera or two cameras to get the intrinsic
  and extrinsic files.
-
  This code also generated rectified image, and also shows RMS Error and Reprojection error
  to find the accuracy of calibration.
- 
  This code captures stereo images from two different cameras (or stereo camera), whose
  index can be changed by changing the index in 'VideoCapture camLeft(0), camRight(2);'
  in the main() function.
- 
  You can set no of stereo pairs you want to use bby editing 'noOfStereoPairs' global
  variable.
- 
  Cheers
  Abhishek Upperwal
- 
  ***********************************************************************/
- 
- 
-
 /* *************** License:**************************
  3rd Oct, 2014
  Right to use this code in any way you want without warranty, support or any guarantee of it working.
- 
  You can distribute, modify or regenerate this code without any warrenty or guarantee by the author.
- 
  By: Abhishek Upperwal
  Country: India
  ************************************************** */
