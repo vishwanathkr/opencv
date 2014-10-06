@@ -27,7 +27,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <iostream>
 
-#define timeGap 3000000000
+#define timeGap 3000000000U
 
 using namespace cv;
 using namespace std;
@@ -125,7 +125,7 @@ void calibrateStereoCamera(Size boardSize, Size imageSize) {
     for (int i=0; i<noOfStereoPairs; i++) {
         for (int j=0; j<boardSize.height; j++) {
             for (int k=0; k<boardSize.width; k++) {
-                objectPoints[i].push_back(Point3f(j,k,0));
+                objectPoints[i].push_back(Point3f(float(j),float(k),0.0));
             }
         }
     }
@@ -248,7 +248,7 @@ int main(int, char**) {
     bool foundCornersInBothImage = false;
     namedWindow("Left Image");
     namedWindow("Right Image");
-    while (true) {
+    for( ; ; ) {
         camLeft>>inputLeft;
         camRight>>inputRight;
         if ((inputLeft.rows != inputRight.rows) || (inputLeft.cols != inputRight.cols)) {
