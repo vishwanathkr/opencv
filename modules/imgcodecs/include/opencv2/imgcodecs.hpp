@@ -92,10 +92,13 @@ enum { IMWRITE_PNG_STRATEGY_DEFAULT      = 0,
 
 @param filename Name of file to be loaded.
 @param flags Flags specifying the color type of a loaded image:
--   CV_LOAD_IMAGE_ANYDEPTH - If set, return 16-bit/32-bit image when the input has the
+-   IMREAD_UNCHANGED - If set, image remains unchanged.
+-   IMREAD_GRAYSCALE - If set, read image is always convert to grayscale.
+-   IMREAD_COLOR - If set, always convert image to the color one.
+-   IMREAD_ANYDEPTH - If set, return 16-bit/32-bit image when the input has the
     corresponding depth, otherwise convert it to 8-bit.
--   CV_LOAD_IMAGE_COLOR - If set, always convert image to the color one
--   CV_LOAD_IMAGE_GRAYSCALE - If set, always convert image to the grayscale one
+-   IMREAD_ANYCOLOR - If set, set any color type to the read image.
+-   IMREAD_LOAD_GDAL - Use gdal driver.
 -   **\>0** Return a 3-channel color image.
 
 @note In the current implementation the alpha channel, if any, is stripped from the output image.
