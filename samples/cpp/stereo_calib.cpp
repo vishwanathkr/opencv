@@ -162,8 +162,8 @@ void saveImages(Mat leftImage, Mat rightImage, int pairIndex) {
         cvtColor(leftImage, leftImage, COLOR_BGR2GRAY);
         cvtColor(rightImage, rightImage, COLOR_BGR2GRAY);
         std::ostringstream leftString, rightString;
-        leftString<<dir<<"/"<<prefixLeft<<pairIndex<<postfix;
-        rightString<<dir<<"/"<<prefixRight<<pairIndex<<postfix;
+        leftString<<dir<<"/"<<prefixLeft<<pairIndex<<"."<<postfix;
+        rightString<<dir<<"/"<<prefixRight<<pairIndex<<"."<<postfix;
         imwrite(leftString.str().c_str(), leftImage);
         imwrite(rightString.str().c_str(), rightImage);
     }
@@ -175,7 +175,7 @@ void calibrateStereoCamera(Size imageSize) {
     for (int i=0; i<noOfStereoPairs; i++) {
         for (int j=0; j<boardSize.height; j++) {
             for (int k=0; k<boardSize.width; k++) {
-                objectPoints[i].push_back(Point3f(float(k),float(j),0.0));
+                objectPoints[i].push_back(Point3f(float(j),float(k),0.0));
             }
         }
     }
