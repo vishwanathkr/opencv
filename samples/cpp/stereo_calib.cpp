@@ -320,6 +320,7 @@ void calibrateInRealTime(int cam1, int cam2) {
         }
         char keyBoardInput = (char)waitKey(50);
         if (keyBoardInput == 'q' || keyBoardInput == 'Q') {
+            camLeft.release(); camRight.release();
             exit(-1);
         }
         else if(keyBoardInput == 'c' || keyBoardInput == 'C') {
